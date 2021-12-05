@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "lE5V9nRHE3YUieP+IZpsoYi2CAHTjifIZXyleplLS/D58BmpY/GvIuUXZfGij15GS2jTvuOR3Ay5aLBzQUYemg==",
+  "dgSpecHash": "hA6qP5FKJs2aL4sIAZikHDCI3F7rJ7fot8TY0h4Ko/qGFUbnnItoESiMeGJKFZOgqvgb9lKMYRkILBrPpG7erg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Dell Admin\\Documents\\Project Apps\\Patch-Master\\Patch-Master\\Patch-Master\\Patch-Master.csproj",
+  "projectFilePath": "C:\\Users\\Dell Admin\\source\\repos\\PatchMaster\\Patch-Master\\Patch-Master\\Patch-Master.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Dell Admin\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
     "C:\\Users\\Dell Admin\\.nuget\\packages\\microsoft.reportingservices.reportviewercontrol.webforms\\150.1449.0\\microsoft.reportingservices.reportviewercontrol.webforms.150.1449.0.nupkg.sha512",
