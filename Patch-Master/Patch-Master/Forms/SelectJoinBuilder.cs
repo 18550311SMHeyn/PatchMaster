@@ -1,0 +1,294 @@
+﻿using Patch_Master.Dto;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace Patch_Master.Forms
+{
+    public partial class SelectJoinBuilder : Form
+    {
+        public static List<SelectJoinDetails> joindetailList = new List<SelectJoinDetails>();
+        public static int lastgroup;
+
+
+        string currentJoin = string.Empty;
+        public SelectJoinBuilder()
+        {
+            InitializeComponent();
+            InitializeJoinConditions();
+        }
+        #region create rows to add Conditions 
+        public void InitializeJoinConditions()
+        {
+             string QueryType = QueryTypeSelector.QueryType;
+        List <string> AddedTableList = new List<string>();
+            switch (QueryType)
+            {
+                case "1":
+                    AddedTableList = SelectQueryBuilder.AddedTableList;
+                    break;
+                case "3":
+                    AddedTableList = UpdateQueryBuilder.AddedTableList;
+                    break;
+            }
+
+            if (joindetailList.Count == 0) {
+                for (int i = 0; i < AddedTableList.Count - 1; i++)
+                {
+                    DrawJoinPanel(AddedTableList, i);
+                    int lastgroup = i;
+                }
+                 
+            } 
+            else
+            {
+                TableChange();
+                if (AddedTableList.Count > joindetailList.Count)
+                {
+                    int newTables = lastgroup + (AddedTableList.Count) - (joindetailList.Count);
+                    for (int i = lastgroup + 1; i < newTables; i++)
+                    {
+                        DrawJoinPanel(AddedTableList, i);
+                    }
+                }
+                
+
+            }
+
+            
+            
+        }
+        private void TableChange()
+        {
+            foreach (Control control in this.JoinBuilder_panel.Controls)
+            {
+                if (control is Panel)
+                {
+                    foreach (Panel pan in this.JoinBuilder_panel.Controls)
+                    {
+                        foreach (Control ctn in pan.Controls)
+                        {
+                            if (ctn is ComboBox)
+                            {
+                                string ControllerName = ctn.Name.ToString();
+                                if (ControllerName != null && ControllerName.Split("_").Length > 0)
+                                {
+                                    ComboBox TCComboBox = (ComboBox)control.Controls[ControllerName];
+                                    if (ControllerName.Split("_")[0] == "TableList1" || ControllerName.Split("_")[0] == "TableList2")
+                                    {
+                                        List<string> tableList = SelectQueryBuilder.AddedTableList;
+                                        TCComboBox.Items.Clear();
+                                        foreach (string TableName in tableList)
+                                        {
+                                            TCComboBox.Items.Add(TableName);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                        
+     
+                }
+            }
+        }
+        private void DrawJoinPanel(List<string> addedTableList, int i)
+        {
+            Panel panel = new Panel();
+            panel.Name = "JoinPanel_" + i;
+            panel.Size = new Size(900, 75);
+            panel.Location = new Point(10, i*(75 + 10));
+
+            Label label1 = new Label();
+            label1.Text = "Table";
+            label1.Location = new Point(10);
+            panel.Controls.Add(label1);
+
+            ComboBox comboBox1 = new ComboBox();
+            comboBox1.Name = "TableList1_" + i;
+            comboBox1.Location = new Point(10, 25);
+            comboBox1.Size = new Size(180, 28);
+            foreach (var item in addedTableList)
+            {
+                comboBox1.Items.Add(item);
+            }
+            comboBox1.SelectedIndexChanged += new EventHandler(TableList__SelectedIndexChanged);
+            panel.Controls.Add(comboBox1);
+
+            Label label2 = new Label();
+            label2.Text = "Column";
+            label2.Location = new Point(190);
+            panel.Controls.Add(label2);
+
+            ComboBox comboBox2 = new ComboBox();
+            comboBox2.Name = "ColumnTableList1_" + i;
+            comboBox2.Location = new Point(190, 25);
+            comboBox2.Size = new Size(180, 28);
+            comboBox2.SelectedIndexChanged += new EventHandler(ColumnList_SelectdIndexChanged);
+           
+            panel.Controls.Add(comboBox2);
+
+            Label label5 = new Label();
+            label5.Text = "Join Type";
+            label5.Location = new Point(370);
+            panel.Controls.Add(label5);
+
+            ComboBox comboBox5 = new ComboBox();
+            comboBox5.Name = "JoinType_" + i;
+            comboBox5.Location = new Point(370, 25);
+            comboBox5.Size = new Size(150, 28);
+            comboBox5.SelectedIndexChanged += new EventHandler(JoinList__SelectedIndexChanged);
+
+            comboBox5.Items.Add("Full Join");
+            comboBox5.Items.Add("Left Join");
+            comboBox5.Items.Add("Right Join");
+            comboBox5.Items.Add("Inner Join");
+            comboBox5.Text = "Inner Join";
+            panel.Controls.Add(comboBox5);
+
+            Label label3 = new Label();
+            label3.Text = "Table";
+            label3.Location = new Point(520);
+            panel.Controls.Add(label3);
+
+            ComboBox comboBox3 = new ComboBox();
+            comboBox3.Name = "TableList2_" + i;
+            comboBox3.Location = new Point(520, 25);
+            comboBox3.Size = new Size(180, 28);
+            foreach (var item in addedTableList)
+            {
+                comboBox3.Items.Add(item);
+            }
+            comboBox3.SelectedIndexChanged += new EventHandler(TableList__SelectedIndexChanged);
+            panel.Controls.Add(comboBox3);
+
+            Label label4 = new Label();
+            label4.Text = "Column";
+            label4.Location = new Point(700);
+            panel.Controls.Add(label4);
+
+            ComboBox comboBox4 = new ComboBox();
+            comboBox4.Name = "ColumnTableList2_" + i;
+            comboBox4.Location = new Point(700, 25);
+            comboBox4.Size = new Size(180, 28);
+            comboBox4.SelectedIndexChanged += new EventHandler(ColumnList_SelectdIndexChanged);
+
+            panel.Controls.Add(comboBox4);
+
+            JoinBuilder_panel.Controls.Add(panel);
+        }
+        #endregion
+        #region Set values to build the join
+        private void JoinList__SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string comboboxName = (sender as ComboBox).Name;
+
+            string selectedJoin = (sender as ComboBox).SelectedItem.ToString();
+            int currentRow = Convert.ToInt32(comboboxName.Split("_")[1]);
+
+            var join = joindetailList.SingleOrDefault(a => a.RowId == currentRow);
+
+            if (join != null)
+            {
+                join.JoinName = selectedJoin;
+            }
+            
+        }
+        private void ColumnList_SelectdIndexChanged(object sender, EventArgs e)
+        {
+            string selectedColumn = (sender as ComboBox).SelectedItem.ToString();
+            string comboboxName = (sender as ComboBox).Name;
+            Panel JoinPanelControll = (Panel)JoinBuilder_panel.Controls["JoinPanel_" + comboboxName.Split("_")[1]];
+            string tableComboboxName = comboboxName.Remove(0, 6);
+            int currentRow = Convert.ToInt32(comboboxName.Split("_")[1]);
+            var join = joindetailList.SingleOrDefault(a => a.RowId == currentRow);
+            if (comboboxName.Split("_")[0].ToString() == "ColumnTableList1")
+            {
+                ComboBox tableComboBox = (ComboBox)JoinPanelControll.Controls["TableList1_" + comboboxName.Split("_")[1]];
+                if (join != null)
+                {
+                    join.RowId = currentRow;
+                    join.TableOne = tableComboBox.SelectedItem.ToString();
+                    join.TableOneColumn = selectedColumn;
+                }
+                else
+                {
+                    SelectJoinDetails selectJoinDetails = new SelectJoinDetails();
+                    selectJoinDetails.RowId = currentRow;
+                    selectJoinDetails.TableOne = tableComboBox.SelectedItem.ToString();
+                    selectJoinDetails.TableOneColumn = selectedColumn;
+                    joindetailList.Add(selectJoinDetails);
+                }
+            }
+            else if (comboboxName.Split("_")[0].ToString() == "ColumnTableList2")
+            {
+                ComboBox tableComboBox = (ComboBox)JoinPanelControll.Controls["TableList2_" + comboboxName.Split("_")[1]];
+                if (join != null)
+                {
+                    join.RowId = currentRow;
+                    join.TableTwo = tableComboBox.SelectedItem.ToString();
+                    join.TableTwoColumn = selectedColumn;
+                    
+                }
+                else
+                {
+                    SelectJoinDetails selectJoinDetails = new SelectJoinDetails();
+                    selectJoinDetails.RowId = currentRow;
+                    selectJoinDetails.TableTwo = tableComboBox.SelectedItem.ToString();
+                    selectJoinDetails.TableTwoColumn = selectedColumn;
+                    joindetailList.Add(selectJoinDetails);
+                }
+            }
+        }
+        private void TableList__SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedTable = (sender as ComboBox).SelectedItem.ToString();
+            string comboboxName = (sender as ComboBox).Name;
+            SelectQueryBuilder selectQueryBuilder = new SelectQueryBuilder();
+            string selectedDatabase = Requirements.SELECTEDDATABSENAME;
+            List<String> columnList =  selectQueryBuilder.LoadAllColumns(selectedDatabase, selectedTable);
+
+            ///Control[] comboBoxColumn = Controls["JoinPanel_" + comboboxName.Split("_")[1]];
+            Panel JoinPanelControll = (Panel)JoinBuilder_panel.Controls["JoinPanel_" + comboboxName.Split("_")[1]];
+            if(comboboxName.Split("_")[0].ToString() == "TableList1")
+            {
+                ComboBox GetColumnLoadingCmbBox1 = (ComboBox)JoinPanelControll.Controls["ColumnTableList1_" + comboboxName.Split("_")[1]];
+                GetColumnLoadingCmbBox1.Items.Clear();
+                foreach (string column in columnList)
+                {
+                    GetColumnLoadingCmbBox1.Items.Add(column);
+                }
+            }
+            else if(comboboxName.Split("_")[0].ToString() == "TableList2")
+            {
+                ComboBox GetColumnLoadingCmbBox1 = (ComboBox)JoinPanelControll.Controls["ColumnTableList2_" + comboboxName.Split("_")[1]];
+                GetColumnLoadingCmbBox1.Items.Clear();
+                foreach (string column in columnList)
+                {
+                    GetColumnLoadingCmbBox1.Items.Add(column);
+                }
+            }
+        }
+        #endregion
+        #region Add join
+        private void AddJoins_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+        }
+        #endregion
+        #region clear join
+        private void button1_Click(object sender, EventArgs e)
+        {
+            List<SelectJoinDetails> joindetailList = new List<SelectJoinDetails>();
+            string currentJoin = string.Empty;
+            //need to add removing selected items from comboboxes
+        }
+        #endregion
+        private void SelectJoinBuilder_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}

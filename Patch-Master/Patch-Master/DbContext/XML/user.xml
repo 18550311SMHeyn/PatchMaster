@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SqlQueryStrings>
+
+  <SqlQueryString Id="CheckAuthentication">
+	  SELECT X.User_Id,X.Username,X.First_Name,X.RoleId,Y.RoleName,X.Status AS Authenticated,X.AcceptanceStatus as Accepted
+	  FROM PM_Users X, PM_User_role Y
+	  WHERE X.UserName=@UserName AND X.Password=@Password
+	  AND X.RoleId=Y.RoleId
+	  AND X.Status=1
+  </SqlQueryString>
+  
+  <SqlQueryString Id="LoadAvailableUsers">
+	  SELECT X.User_Id As 'User ID', X.Username as 'User Name',X.First_Name AS 'First name',
+	  X.Last_Name as 'Last Name', X.Designation as 'Designation',Y.RoleName as 'User Role', AcceptanceStatus as 'Acceptance'
+	  FROM PM_Users X
+	  inner join PM_User_role Y
+	  on  X.RoleId = Y.RoleId
+	  WHERE X.Status=@Status
+	  order by [AcceptanceStatus],[User_Id]
+  </SqlQueryString>
+  
+  <SqlQueryString Id="LoadsavedRolesList">
+    SELECT RoleId, RoleName
+    FROM PM_User_role
+    WHERE Status=@Status
+  </SqlQueryString> 
+  
+  <SqlQueryString Id="DeleteUsers">
+    UPDATE PM_Users
+    SET status=0
+    WHERE User_Id in (@UserIdList)
+  </SqlQueryString>
+
+  <SqlQueryString Id="AddUser">
+	  INSERT INTO [dbo].[PM_Users]
+	  ([UserName]
+	  ,[Password]
+	  ,[First_Name]
+	  ,[Last_Name]
+	  ,[RoleId]
+	  ,[Createddate]
+	  ,[Status],
+	  [Designation])
+	  OUTPUT Inserted.User_Id
+	  VALUES
+	  (@userName
+	  ,@password
+	  ,@firstName
+	  ,@lastName
+	  ,@roleId
+	  ,GETDATE()
+	  ,1
+	  ,@Designation)
+
+  </SqlQueryString>
+	<SqlQueryString Id="AcceptUser">
+		UPDATE PM_Users
+		SET AcceptanceStatus = 1, RoleId = @RoleId
+		WHERE User_Id = @UserId
+	</SqlQueryString>
+</SqlQueryStrings>

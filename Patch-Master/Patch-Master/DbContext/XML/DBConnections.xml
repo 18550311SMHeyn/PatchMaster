@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<SqlQueryStrings>
+  <SqlQueryString Id="SaveDatabaseDetails">
+    INSERT INTO PM_Databases (DBName, ServerName, UserName, Password, Status,Is_Intregatedsecurity,CreatedDate,CreatedBy)
+    OUTPUT INSERTED.DB_Id
+    VALUES (@DBName, @ServerName, @UserName,@Password, 1, @Is_Intregatedsecurity, GETDATE(), @CreatedBy);
+  </SqlQueryString>
+  <SqlQueryString Id="getAvailableDatabses">
+    select DBName from PM_Databases where serverName = @ServerName and status = 1
+  </SqlQueryString>
+  <SqlQueryString Id="removeDatabasefromName">
+    update [PM_Databases] set Status = 0  where ServerName = @ServerName and DBName = @DBName
+  </SqlQueryString>
+  <SqlQueryString Id="loadDatabases">
+    SELECT DB_Id, DBName
+    FROM PM_Databases
+    WHERE Status=@Status
+  </SqlQueryString>
+  <SqlQueryString Id="LoadAvailableTables">
+	  USE [??DbName]
+	  SELECT
+	  TABLE_NAME
+	  AS TableName
+	  FROM
+	  information_schema.tables
+	  order by TABLE_NAME ;
+  </SqlQueryString>
+
+
+</SqlQueryStrings>

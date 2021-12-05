@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SqlQueryStrings>
+	<SqlQueryString Id="CreateRequest">
+		insert into PM_Request ([Requirement_Id],[Description],[Request_Date],[Request_User],[RequestBy],[Approval_Status],[Execution_Status])
+		OUTPUT Inserted.[Request_Id], Inserted.[Description], Inserted.[Request_Date],inserted.Approval_Status
+		values (@RequirmentId, @RequirmentDescription, GETDATE(),@LoginUser,@LoginUserID,'Pending',0)
+	</SqlQueryString>
+
+	<SqlQueryString Id="ModifyRequestDescription">
+		update PM_Request
+		set Description = @RequestDescription
+		where Request_Id = @RequestId
+	</SqlQueryString>
+	<SqlQueryString Id="RequestList">
+		If @NavigatedFrom ='MakeRequest'
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed', us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date', RS.Comment as 'Comment'
+		From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+		where RS.Requirement_Id = @RequirmentId
+
+		else if  @NavigatedFrom ='ApproveRequest'
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed', us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date', RS.Comment as 'Comment'
+		From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+		where RQ.SubProcessId = @SubProcessId and RS.Approval_Status ='Pending'
+
+		else if @NavigatedFrom ='ExecuteRequest'
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed', us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date', RS.Comment as 'Comment'
+		From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+		where RQ.SubProcessId = @SubProcessId and RS.Approval_Status ='Approved' and RS.Execution_Status = 0
+
+		Else
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed', us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date', RS.Comment as 'Comment'
+		From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+	</SqlQueryString>
+	<SqlQueryString Id="RequestListByStatus">
+		if @result ='both'
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed',us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date', RS.Comment as 'Comment' From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+		where RS.Approval_Status = @ApStatus and RS.Execution_Status = @ExStatus and RS.Requirement_Id = @RequirmentId
+
+		else if @result ='ApOnly'
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed',us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date', RS.Comment as 'Comment' From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+		where RS.Approval_Status = @ApStatus and RS.Requirement_Id = @RequirmentId
+
+		else if @result ='ExOnly'
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed',us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date', RS.Comment as 'Comment' From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+		where RS.Execution_Status = @ExStatus and RS.Requirement_Id = @RequirmentId
+
+		else
+		select RS.Requirement_Id as 'Requirment ID',
+		Rs.Request_Id as 'Request ID', RQ.RequirementName as 'Requirment Name', Rq.Objective as 'Objective', RS.Description as 'Desc',
+		Db.DBName as 'Database', RS.Request_User as 'Requested User', RS.Request_Date  as 'Requested Date', RS.Approval_Status as 'Approve',
+		RS.Execution_Status as 'Executed',us.UserName as 'Approved User', RS.ApprovedDate as 'Approved Date' , RS.Comment as 'Comment' From PM_Request RS
+		inner join PM_Requiremenet RQ
+		on RS.Requirement_Id = RQ.RequirementId
+		inner join PM_Databases DB
+		on RQ.DB_Id = DB.DB_Id
+		Full join PM_Users US
+		on RS.ApprovedBy = US.User_Id
+		where RS.Requirement_Id = @RequirmentId
+	</SqlQueryString>
+	<SqlQueryString Id="ApproveRequest">
+		update PM_Request
+		set Approval_Status = @ApprovedRejected, Comment = @Comment ,[ApprovedDate] = GETDATE(),ApprovedBy = @LoginUserID
+		output inserted.Request_Id, inserted.Approval_Status
+		where Request_Id = @RequestId
+	</SqlQueryString>
+	<SqlQueryString Id="CreateRequestedQueries">
+		insert into PM_Requested_Queries 
+		select @RequestID,QueryId,QueryString,ExecutionOrder,0,'',null from [dbo].[PM_Queries]
+		where RequirementId = @RequirmentId
+	</SqlQueryString>
+	<SqlQueryString Id="SELECTApprovalReq">
+		select [ApprovalRequired] from PM_QueryTypes
+		where QueryTypeId in (1,5)
+	</SqlQueryString>
+	<SqlQueryString Id="CountOfUpadte">
+		select COUNT(RQ.Requested_Query_ID) as CountUPDATE from PM_Requested_Queries RQ
+		inner join PM_Queries Q
+		on RQ.QueryID = Q.QueryId
+		where RQ.Request_ID = @RequuestId and Q.QueryTypeId not in (1,5)
+	</SqlQueryString>
+		
+</SqlQueryStrings>
